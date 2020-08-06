@@ -1,4 +1,4 @@
-import { fromEvent } from "rxjs";
+import { fromEvent, Observable, from } from "rxjs";
 import { scan, throttleTime, map } from "rxjs/operators";
 
 const button = document.querySelector("button");
@@ -77,5 +77,73 @@ fromEvent(button, "click")
 /* -------------------------------------------------------------------------- */
 
 /* -------------------------------------------------------------------------- */
-/* ---------------------------- End Rxjs Overview --------------------------- */
+/* -------------------------- End of Rxjs Overview -------------------------- */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* ---------------------------- RxJS Observables ---------------------------- */
+/* -------------------------------------------------------------------------- */
+
+const observable = new Observable((subscriber) => {
+  try {
+    subscriber.next(1);
+    subscriber.next(2);
+    subscriber.next(3);
+
+    setTimeout(() => {
+      subscriber.next(4);
+      // subscriber.complete();
+    }, 1000);
+
+    subscriber.next(5);
+
+    const intervalId = setInterval(() => {
+      subscriber.next("hi");
+    }, 1000);
+
+    // we can also unsubscribe() that without this code below but it's a custom
+    return function unsubscribe() {
+      console.log("unsubcribe our observables");
+      clearInterval(intervalId);
+    };
+  } catch (err) {
+    subscriber.error(err);
+  }
+});
+
+console.log("just before subscribe");
+
+// if we want to use unsubsribe(), we gotta store our observable.subscribe(...) in a variable
+const useObservable = observable.subscribe({
+  next(x) {
+    console.log("got value " + x);
+  },
+  error(err) {
+    console.log(err);
+  },
+  complete() {
+    console.log("done");
+  },
+});
+
+console.log("just after subscribe");
+
+/* -------------------------------------------------------------------------- */
+
+// use unsubscribe()
+fromEvent(button, "click").subscribe(() => {
+  useObservable.unsubscribe();
+});
+
+const foo = new Observable((subscriber) => {
+  console.log("Hello");
+  subscriber.next(42);
+});
+
+foo.subscribe((x) => console.log(x));
+
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* ------------------------- End of Rxjs Observables ------------------------ */
 /* -------------------------------------------------------------------------- */
